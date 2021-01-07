@@ -1,0 +1,112 @@
+using UnityEngine;
+using UnityEngine.UI;
+
+// Harry Wilson
+// Bat Movement Script [BRICKBREAKER 4EVER]
+// 07/01/2021 22:30pm
+
+class BatMovement : MonoBehaviour
+{
+
+    // Public key code variables to detect certain key presses
+    public KeyCode moveLeftKey = KeyCode.LeftArrow;
+    public KeyCode moveRightKey = KeyCode.RightArrow;
+
+    // Boolean variables to detect if the paddle can move or not
+    bool canMoveLeft = true;
+    bool canMoveRight = true;
+
+    // Float variables for the speed and direction of the paddle
+    public float speed = 0.2f;
+    float direction = 0.0f;
+
+    // Public variable to call the game manager
+    public GameManager gm;
+
+
+
+    // Fixed update function to calculate position and speed of the paddle
+    void FixedUpdate()
+    {
+
+        Vector3 position = transform.localPosition;
+        position.x += speed * direction;
+        transform.localPosition = position;
+
+    }
+
+
+    // Update function to detect key presses and a game over
+    void Update()
+    {
+
+        // If statment to detect if the player has gotten a game over
+        if (gm.gameOver)
+        {
+            return;
+        }
+
+        // Boolean variable to detect if the left or right buttons are pressed down
+        bool isLeftPressed = Input.GetKey(moveLeftKey);
+        bool isRightPressed = Input.GetKey(moveRightKey);
+
+        // If statment to detect if the paddle can move and in what direction to take it
+        // For moving left
+        if (isLeftPressed && canMoveLeft)
+        {
+            direction = -1.0f;
+        }
+
+        // For moving right
+        else if (isRightPressed && canMoveRight)
+        {
+            direction = 1.0f;
+        }
+
+        // For not moving
+        else
+        {
+            direction = 0.0f;
+        }
+
+    }
+
+
+    // Collision detection for the paddle hitting the side boundaries
+    void OnCollisionEnter2D(Collision2D other)
+    {
+
+        // Switch statment to check if the paddle is able to move left and right
+        switch (other.gameObject.name)
+        {
+            case "LeftWall":
+                canMoveLeft = false;
+                break;
+
+            case "RightWall":
+                canMoveRight = false;
+                break;
+        }
+
+    }
+
+
+    // Collision detection for the paddle moving away from the side boundaries
+    void OnCollisionExit2D(Collision2D other)
+    {
+
+        // Switch statment to check if the paddle is away from the side boundaries
+        switch (other.gameObject.name)
+        {
+            case "LeftWall":
+                canMoveLeft = true;
+                break;
+
+            case "RightWall":
+                canMoveRight = true;
+                break;
+        }
+
+    }
+
+}
