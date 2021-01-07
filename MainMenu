@@ -1,0 +1,60 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+
+// Harry Wilson
+// Main Menu Script [BRICKBREAKER 4EVER]
+// 07/01/2021 22:30pm
+
+public class MainMenu : MonoBehaviour
+{
+
+    // Public variable to edit highscore text on the main menu
+    public Text highScoreText;
+
+
+    // Functionaility for the play button to take you to the correct scene
+    public void PlayButton()
+    {
+        SceneManager.LoadScene("Game");
+    }
+
+
+    // Functionaility for the quit button to quit the game
+    public void QuitButton()
+    {
+        Application.Quit();
+    }
+
+
+    // Update function to update highscore on main menu
+    void Update()
+    {
+
+        // Calling the PlayerPref "HIGHSCORE"  so that I can save and use throughout multiple scenes
+        int highScore = PlayerPrefs.GetInt("HIGHSCORE");
+
+
+        // Detection to check whether or not the user has a highscore or not
+        if (highScore > 0)
+        {
+            highScoreText.text = ("CURRENT HIGHSCORE: " + highScore);
+        } else
+        {
+            highScoreText.text = ("");
+        }
+
+
+        // A key bind to reset highscore for testing purposes
+        if (Input.GetKey("up"))
+        {
+            highScore = 0;
+            PlayerPrefs.SetInt("HIGHSCORE", highScore);
+            print(highScore);
+        }
+
+    }
+}
