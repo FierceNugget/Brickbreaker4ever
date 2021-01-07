@@ -1,0 +1,198 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
+using System.Collections.Generic;
+
+// Harry Wilson
+// Game Manager Script [BRICKBREAKER 4EVER]
+// 07/01/2021 22:30pm
+
+public class GameManager : MonoBehaviour
+{
+
+    // Public integers and float variables
+    public int brickCount;
+    public int lives;
+    public int score;
+    public int scoreMult;
+    public float speedMult;
+
+    // Public text variables to control and update text
+    public Text speedMultText;
+    public Text scoreMultText;
+    public Text livesText;
+    public Text scoreText;
+    public Text highScoreText;
+    public Text finalScore;
+
+    // Public boolean variables to detect how the game ended
+    public bool gameOver;
+    public bool isLevelComplete;
+
+    // Public game object variables to control the seperate screens
+    public GameObject gameOverScreen;
+    public GameObject game;
+    public GameObject levelCompleteScreen;
+
+    // Public array variables to store the bricks and levels
+    public Transform[] bricks;
+    public Transform[] levels;
+
+
+
+    // Start function to setup UI and count the amount of bricks
+    void Start()
+    {
+
+        livesText.text = "LIVES: " + lives;
+        scoreText.text = "SCORE: " + score;
+        brickCount = GameObject.FindGameObjectsWithTag("Brick").Length;
+
+    }
+
+
+    // Function to update lives when lost and to detect a game over
+    public void UpdateLives(int livesChange)
+    {
+
+        lives += livesChange;
+
+        // If statement to detect if the lives are 0 or below
+        if (lives <= 0)
+        {
+            lives = 0;
+            EndGame();
+        }
+
+        // Update UI text with new integer 
+        livesText.text = "LIVES: " + lives;
+
+    }
+
+
+    // Function to update score and update the UI
+    public void UpdateScore(int scoreChange)
+    {
+
+        score += scoreChange;
+        scoreText.text = "SCORE: " + score;
+
+    }
+
+
+    // Function to change and update the amount of bricks left to destroy
+    public void UpdateBrickNumber()
+    {
+
+        brickCount--;
+
+        // If statement to detect when there are no more bricks left
+        if (brickCount <= 0)
+        {
+            LevelComplete();
+        }
+
+    }
+
+
+    // Detection for completing the level by breaking all the bricks
+    public void LevelComplete()
+    {
+        
+        // Display level complete screen and increase multipliers
+        game.SetActive(false);
+        levelCompleteScreen.SetActive(true);
+        speedMult = speedMult + 0.1f;
+        scoreMult = scoreMult + 10;
+
+        // Update text on level complete screen
+        speedMultText.text = "SPEED: " + (speedMult) + "x";
+        scoreMultText.text = "SCORE: " + (scoreMult);
+
+        // Call 'NextLevel' function with a 3 second delay
+        Invoke("NextLevel", 3.0f);
+
+    }
+
+
+    // Function to load the next level
+    void NextLevel()
+    {
+
+        // Apply the correct screens
+        levelCompleteScreen.SetActive(false);
+        game.SetActive(true);
+
+        // Load level 1 prefab from an array and place at 0, 0, 0 with no rotation
+        Instantiate(levels[0], new Vector3(0, 0, 0), Quaternion.identity);
+
+        // Recount the amount of bricks and set 'isLevelComplete' to true
+        brickCount = GameObject.FindGameObjectsWithTag("Brick").Length;
+        isLevelComplete = true;
+
+    }
+
+
+    // Function to end the game from losing lives
+    void EndGame()
+    {
+
+        // Set 'gameOver' to true and activate the game over screen
+        gameOver = true;
+        gameOverScreen.SetActive(true);
+        game.SetActive(false);
+        levelCompleteScreen.SetActive(false);
+
+        // Destroy any extra bricks and display the final score
+        DestroyBricks();
+        finalScore.text = "YOUR SCORE WAS " + score;
+
+        // Calling the PlayerPref "HIGHSCORE" and using an if statment to detect if a new highscore has been reached
+        int highScore = PlayerPrefs.GetInt("HIGHSCORE");
+        if (score > highScore)
+        {
+            highScore = score;
+            PlayerPrefs.SetInt("HIGHSCORE", highScore);
+            highScoreText.text = ("NEW HIGHSCORE!");
+        } else
+        {
+            highScoreText.text = ("HIGHSCORE: " + highScore);
+        }
+
+    }
+
+
+    // Function to destory any extra bricks left behind from the prefab
+    void DestroyBricks()
+    {
+
+        // Find every game object with the tag "Brick" and store in an array
+        GameObject[] bricks = GameObject.FindGameObjectsWithTag("Brick");
+
+        // for statment to delete the correct amount of game objects
+        for (int i = 0; i < bricks.Length; i++)
+        {
+            Destroy(bricks[i]);
+        }
+
+    }
+
+
+    // Function for yes button on the game over screen
+    public void PlayAgainYes()
+    {
+
+        SceneManager.LoadScene("Game");
+
+    }
+
+    // Function for no button on the game over screen
+    public void PlayAgainNo()
+    {
+
+        SceneManager.LoadScene("MainMenu");
+
+    }
+}
