@@ -1,0 +1,143 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+// Harry Wilson
+// Ball Movement Script [BRICKBREAKER 4EVER]
+// 07/01/2021 22:30pm
+
+public class BallMovement : MonoBehaviour
+{
+
+    // Public integers and boolean variables
+    public int points;
+    public int speed;
+    public bool moving;
+
+    // Variables for Rigidbody2D and for the location of the paddle
+    public Rigidbody2D rb;
+    public Transform paddle;
+
+    // Variables for game manager and audio source 
+    public GameManager gm;
+    AudioSource audio;
+
+
+
+    // Start function to get components of rigidbody and audio
+    void Start()
+    {
+
+        rb = GetComponent<Rigidbody2D>();
+        audio = GetComponent<AudioSource>();
+
+    }
+
+    // Update function for ball movement and detection for level complete
+    void Update()
+    {
+
+        // If statement to detect if the player has gotten a game over
+        if (gm.gameOver)
+        {
+            return;
+        }
+
+        // If statment to detect if the player completed a level
+        if (gm.isLevelComplete)
+        {
+            
+            // Set velocity of ball to 0 and reset variables back to their default
+            rb.velocity = Vector2.zero;
+            moving = false;
+            gm.isLevelComplete = false;
+
+            // Add a life and update the multipliers after each level
+            gm.UpdateLives(+1);
+            points = points + 10;
+            speed = speed + 50;
+
+        }
+
+
+        // If statment to detect if the ball is in a moving state or not
+        if (!moving)
+        {
+
+            transform.position = paddle.position;
+
+        }
+
+
+        // If statment for the controls of the paddle
+        // Using transform.position.x to find out which side of the screen the bat is
+        // Ball direction based upon x location
+
+        // If statment for the right side positioning
+        if (Input.GetButtonDown("Jump") && transform.position.x > 0 &&!moving)
+        {
+
+            moving = true;
+            rb.AddForce(Vector2.up * speed);
+            rb.AddForce(Vector2.right * (speed / 2));
+
+        }
+
+        // If statment for left side positioning
+        else if (Input.GetButtonDown("Jump") && transform.position.x < 0 && !moving)
+        {
+
+            moving = true;
+            rb.AddForce(Vector2.up * speed);
+            rb.AddForce(Vector2.left * (speed / 2));
+
+        }
+
+        // If statment for central positioning 
+        else if (Input.GetButtonDown("Jump") && transform.position.x == 0 && !moving)
+        {
+
+            moving = true;
+            rb.AddForce(Vector2.up * speed);
+
+        }
+
+    }
+
+
+    // Trigger detection for if the ball has fallen out of bounds
+    void OnTriggerEnter2D(Collider2D other)
+    {
+
+        // If statment to clarify the correct collider
+        if (other.gameObject.tag == "Pit")
+        {
+            // Remove any forces applied to the ball
+            rb.velocity = Vector2.zero;
+
+            // Resets moving boolean and removes a life
+            moving = false;
+            gm.UpdateLives(-1);
+        }
+
+    }
+
+
+    // Collision detection for breaking with the bricks and adding audio
+    void OnCollisionEnter2D(Collision2D other)
+    {
+
+        // If statment to clarify the correct game objects
+        if (other.gameObject.tag == "Brick")
+        {
+            // Destroy what the ball collided with and update variables
+            Destroy(other.gameObject);
+            gm.UpdateScore(points);
+            gm.UpdateBrickNumber();
+        }
+
+        // Play audio source when colliding with anything
+        audio.Play();
+
+    }
+}
