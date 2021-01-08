@@ -48,6 +48,16 @@ During my coursework for Introduction to Games Programming, we have been tasked 
 
 The main menu script handles anything that is shown on the main menu. In my game, the main menu is saved as a separate scene so I had to write code that would allow me to navigate between these scenes using buttons. This script also includes a function to save recent high scores and display them on the front page.
 
+```sh
+if (highScore > 0)
+  {
+    highScoreText.text = ("CURRENT HIGHSCORE: " + highScore);
+  } else
+  {
+    highScoreText.text = ("");
+  }
+```
+
 ### Game Manager
 
 The game manager deals with most of the mechanics for the game and is used heavily to link everything together. It contains functions for completing a level, getting a game over screen and changing stage. It also deals with the infinitely increasing score and speed multiplier that gets put on at the start of each new stage. I did this by constantly counting how many bricks are left in the stage and if their number is 0, it would then run the level complete function that would increase the multiplier.
@@ -71,13 +81,48 @@ if (score > highScore)
     highScoreText.text = ("NEW HIGHSCORE!");
   } else
   {
-    highScoreText.text = ("HIGHSCORE: " + highScore);
+    HighScoreText.text = ("HIGHSCORE: " + highScore);
   }
 ```  
 ### Ball Movement
 
+This script deals with everything that a ball can do and collide with. It contains a collision function to detect if it is colliding with the bricks and a trigger collider to detect if the ball has fallen bast the paddle and into the put. It also contains an if statement that detects if the ball is not moving and if the spacebar is pressed, it would then launch the ball up and to the side of the screen you are on (being central in the screen will send the ball directly upwards.
+
+```sh
+if (Input.GetButtonDown("Jump") && transform.position.x > 0 && !moving)
+  {
+    moving = true;
+    rb.AddForce(Vector2.up * speed);
+    rb.AddForce(Vector2.right * (speed / 2));
+  }
+```
+
 ### Bat Movement
 
+For the paddle movement and collision with the side, walls are, I use this script. I use public keycode variables to detect the left and right key movement and public boolean to detect if the paddle can move left and right.
+
+```sh
+public KeyCode moveLeftKey = KeyCode.LeftArrow;
+public KeyCode moveRightKey = KeyCode.RightArrow;
+
+bool canMoveLeft = true;
+bool canMoveRight = true;
+```
+
+I then used these public variables within a switch statement within a collision function to stop the paddle if it detected that we were touching either the left or right boundary. This stops it from continuing to the side without being stopped.
+
+```sh
+switch (other.gameObject.name)
+  {
+    case "LeftWall":
+      canMoveLeft = false;
+      break;
+
+    case "RightWall":
+      canMoveRight = false;
+      break;
+  }
+```
 ## Challenging Code
 
 One piece of code that I found challenging and difficult to implement is the removal of bricks after a game over screen has occurred on level 2 or later. This was difficult because of how I stored my levels. I wanted to store the levels as prefabs in an array so that I could call back to them and store multiple levels easily. I then ran into a problem, after completing the first level, it would respawn the prefab as a clone outside the determined game object. This means that when my game over script ran and there were still blocks on the screen, they weren't being removed because they were no longer stored inside the game object.
@@ -85,13 +130,13 @@ One piece of code that I found challenging and difficult to implement is the rem
 Luckily, I was using prefabs that all shared one common property, they all had the "Brick" tag. This meant that I could do a search for any game object with the "Brick" tag and destroy it. The way I did this was by using FindGameObjectsWithTag to store all bricks in its own array, I then used a simple for loop that would count the number of bricks in the array and delete them all until the value is 0. I then placed this bit of code inside its own function so that I could call it in my game over the script.
 
   ```sh
-    void DestroyBricks()
-    {
-        GameObject[] bricks = GameObject.FindGameObjectsWithTag("Brick");
+void DestroyBricks()
+  {
+    GameObject[] bricks = GameObject.FindGameObjectsWithTag("Brick");
         
-        for (int i = 0; i < bricks.Length; i++)
-        {
-            Destroy(bricks[i]);
-        }
+    for (int i = 0; i < bricks.Length; i++)
+    {
+      Destroy(bricks[i]);
     }
+  }
   ```
